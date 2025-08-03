@@ -66,12 +66,6 @@ To run the full pipeline, use the following command:
 python run_pipeline.py
 ```
 
-To run individual scripts, use:
-```
-python src/<script_name>.py
-```
-Replace `<script_name>` with the desired script (e.g., `data_preparation.py`).
-
 ## Results
 The results of the analysis and forecasting are stored in the `results/` directory. This includes model outputs, visualizations, evaluation metrics, and a comprehensive PDF report.
 
@@ -89,14 +83,6 @@ The project requires the following Python packages:
 - prophet
 - xgboost
 
-## Contributing
-Contributions are welcome! Please follow these steps:
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Submit a pull request with a detailed description of your changes.
-
-## License
-This project is licensed under the MIT License. See the LICENSE file for details.
 
 ## Contact
-For questions or feedback, please contact Ali Rashaideh at [email@example.com].
+For questions or feedback, please contact Ali Rashaideh at alirashaideh@yahoo.com.
