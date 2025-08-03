@@ -77,27 +77,33 @@ def handle_missing_values(df):
     # Linear interpolation for medium gaps
     df_interp = df_ffill.interpolate(method='linear', limit_direction='both')
     
-    # Flag missing values
-    df_interp['missing'] = df.isnull().any(axis=1).astype(int)
     return df_interp
 
 def detect_outliers(df, window=24, threshold=3):
     """Detect and handle outliers using rolling statistics"""
     print("Detecting outliers...")
     df = df.copy()
-    numeric_cols = [col for col in df.columns if df[col].dtype in ['float32', 'float64']]
     
-    for col in tqdm(numeric_cols, desc="Processing columns"):
-        # Calculate rolling statistics
-        rolling_median = df[col].rolling(window=window, center=True, min_periods=1).median()
-        rolling_std = df[col].rolling(window=window, center=True, min_periods=1).std().replace(0, 1)
+    # Identify numeric columns
+    numeric_cols = df.select_dtypes(include=np.number).columns
+    
+    # Process each numeric column
+    for col in numeric_cols:
+        # Calculate quartiles and IQR
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
         
-        # Identify outliers
-        outlier_mask = np.abs(df[col] - rolling_median) > (threshold * rolling_std)
+        # Calculate bounds using threshold as IQR multiplier
+        lower_bound = Q1 - threshold * IQR
+        upper_bound = Q3 + threshold * IQR
         
-        # Replace outliers with rolling median
-        df.loc[outlier_mask, col] = rolling_median[outlier_mask]
+        if 'power' in col.lower() or 'sub' in col.lower():
+            lower_bound = max(lower_bound, 0)
         
+        # Clip outliers
+        df[col] = df[col].clip(lower_bound, upper_bound)
+    
     return df
 
 def aggregate_data(df):
@@ -111,7 +117,6 @@ def aggregate_data(df):
         'Sub_metering_1': 'sum',
         'Sub_metering_2': 'sum',
         'Sub_metering_3': 'sum',
-        'missing': 'max'
     }
     
     hourly = df.resample('H').agg(aggregations)

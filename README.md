@@ -1,22 +1,20 @@
 # Energy Forecasting Project
 
 ## Overview
-The Energy Forecasting Project is designed to analyze and predict energy consumption patterns using advanced data science techniques. This project leverages exploratory data analysis (EDA), feature engineering, and machine learning modeling to provide accurate energy forecasts.
+The Energy Forecasting Project is designed to analyze and predict energy consumption  using  data science techniques. This project leverages exploratory data analysis (EDA), feature engineering, machine learning modeling to provide energy forecasts.
 
 ## Project Structure
 
 ```
-├── data/                # Raw and processed data files
-├── eng/                 # Python virtual environment
-├── notebooks/           # Jupyter notebooks for analysis and reporting
+├── data/                # Raw and processed data files will be generated using data preperation 
+├── notebooks/           # IPYNB notebooks for analysis and reporting
 ├── results/             # Outputs and results of the analysis
-├── src/                 # Source code for data preparation, feature engineering, modeling, and evaluation
+├── src/                 # Source code for data preparation, feature engineering, modeling, evaluation
 │   ├── data_preparation.py
 │   ├── feature_engineering.py
 │   ├── modeling.py
 │   ├── evaluation.py
 ├── run_pipeline.py      # Script to execute the full pipeline
-├── README.md            # Project documentation
 ├── requirements.txt     # Python dependencies
 ```
 
@@ -34,7 +32,7 @@ The Energy Forecasting Project is designed to analyze and predict energy consump
 
 3. Set up the Python virtual environment:
    ```
-   eng\Scripts\activate
+   .venv\Scripts\activate.ps1
    ```
 
 4. Install the required dependencies:
@@ -45,20 +43,40 @@ The Energy Forecasting Project is designed to analyze and predict energy consump
 ## Usage
 
 ### Notebooks
-- `EDA.ipynb`: Perform exploratory data analysis on the energy dataset.
-- `Energy_Forecasting_Report.ipynb`: Generate a detailed report on energy forecasting.
+- `EDA.ipynb`: Perform EDA on the energy dataset.
+- `Energy_Forecasting_Report.ipynb`: a detailed report on the project.
 
 ### Scripts
 
-- `data_preparation.py`: This script handles the preprocessing of raw data. It includes tasks such as downloading, extracting, cleaning, handling missing values, detecting outliers, and aggregating data at different time frequencies.
+- `data_preparation.py`: This script handles the preprocessing of raw data. It performs the following tasks:
+  - Downloads and extracts the dataset from a specified URL.
+  - Loads the raw data into a pandas DataFrame and preprocesses it by handling missing values and detecting outliers.
+  - Aggregates the data into different time frequencies (hourly, daily, weekly).
+  - Saves the processed data into CSV files for further analysis.
 
-- `feature_engineering.py`: This script is responsible for creating new features from the existing dataset. It applies techniques like creating time-based features, lag features, rolling statistical features, holiday indicators, and weather placeholders. It also scales the features for modeling.
+- `feature_engineering.py`: This script is responsible for creating new features from the existing dataset. It includes:
+  - Generating time-based features such as hour, day of the week, and month.
+  - Creating lag features to capture temporal dependencies.
+  - Adding rolling statistical features like mean and standard deviation.
+  - Incorporating holiday indicators and placeholder weather features.
+  - Scaling numerical features using StandardScaler for better model performance.
 
-- `modeling.py`: This script focuses on building and training machine learning models for energy forecasting. The models used include SARIMA, Facebook Prophet, and XGBoost. It trains these models using default parameters without hyperparameter tuning.
+- `modeling.py`: This script focuses on building and training machine learning models for the forecasting. It includes:
+  - Splitting the dataset into training and testing sets.
+  - Training three models: SARIMA, Facebook Prophet, and XGBoost.
+  - Evaluating the models using metrics such as MAE, RMSE, and MAPE.
+  - Generating point predictions and uncertainty intervals for each model.
 
-- `evaluation.py`: This script evaluates the performance of the trained models. It calculates metrics such as Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and Mean Absolute Percentage Error (MAPE). It also generates visualizations for forecasts, residuals, and uncertainty metrics.
+- `evaluation.py`: This script evaluates the performance of the trained models. It performs:
+  - Calculation of prediction interval metrics such as coverage and interval width.
+  - Visualization of forecasts with uncertainty intervals.
+  - Residual analysis using plots like histograms, autocorrelation, and QQ plots.
+  - Creation of a comprehensive PDF report summarizing model performance and uncertainty metrics.
 
-- `run_pipeline.py`: This script orchestrates the entire pipeline, including data preparation, feature engineering, modeling, and evaluation. It saves the results and generates a comprehensive report.
+- `run_pipeline.py`: This script orchestrates the entire pipeline. It:
+  - Executes the data preparation, feature engineering, modeling, and evaluation scripts sequentially.
+  - Saves the results, including model performance metrics and predictions.
+  - Generates a final report in PDF format summarizing the entire analysis.
 
 ### Running Scripts
 To run the full pipeline, use the following command:
@@ -85,4 +103,4 @@ The project requires the following Python packages:
 
 
 ## Contact
-For questions or feedback, please contact Ali Rashaideh at alirashaideh@yahoo.com.
+For questions or feedback, alirashaideh@yahoo.com.
