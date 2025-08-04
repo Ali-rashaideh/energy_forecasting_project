@@ -3,6 +3,18 @@
 ## Overview
 The Energy Forecasting Project is designed to analyze and predict energy consumption  using  data science techniques. This project leverages exploratory data analysis (EDA), feature engineering, machine learning modeling to provide energy forecasts.
 
+| Feature                     | Description                                                                      | Units         |
+| --------------------------- | -------------------------------------------------------------------------------- | ------------- |
+| **Global\_active\_power**   | Whole-house real (active) power consumed, averaged over one minute               | kW            |
+| **Global\_reactive\_power** | Whole-house reactive power (non-working component), averaged over one minute     | kVar          |
+| **Voltage**                 | Mains supply voltage measured at the house                                       | V             |
+| **Global\_intensity**       | Total electric current drawn by the house, averaged over one minute              | A             |
+| **Sub\_metering\_1**        | Energy usage recorded on the kitchen circuit (e.g., dishwasher, microwave)       | Wh per minute |
+| **Sub\_metering\_2**        | Energy usage recorded on the laundry-room circuit (e.g., washing machine, dryer) | Wh per minute |
+| **Sub\_metering\_3**        | Energy usage recorded on the water-heater / HVAC circuit                         | Wh per minute |
+
+
+
 ## Project Structure
 
 ```

@@ -1,86 +1,87 @@
+import os
+import joblib
 import pandas as pd
 import numpy as np
 import holidays
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 def create_time_features(df):
-    """Create time-based features from datetime index"""
-    df = df.copy()
-    df['hour'] = df.index.hour
-    df['day_of_week'] = df.index.dayofweek
-    df['day_of_month'] = df.index.day
-    df['week_of_year'] = df.index.isocalendar().week
-    df['month'] = df.index.month
-    df['quarter'] = df.index.quarter
-    df['year'] = df.index.year
-    df['is_weekend'] = (df.index.dayofweek >= 5).astype(int)
+    idx = df.index
+    df['hour'] = idx.hour.astype('int8')
+    df['day_of_week'] = idx.dayofweek.astype('int8')
+    df['day_of_month'] = idx.day.astype('int8')
+    df['week_of_year'] = idx.isocalendar().week.astype('int16')
+    df['month'] = idx.month.astype('int8')
+    df['quarter'] = idx.quarter.astype('int8')
+    df['year'] = idx.year.astype('int16')
+    df['is_weekend'] = (idx.dayofweek >= 5).astype('int8')
     return df
 
-def create_lag_features(df, target_col, lags=[24, 48, 168]):
-    """Create lag features for specified time intervals"""
-    df = df.copy()
-    for lag in lags:
-        df[f'{target_col}_lag_{lag}'] = df[target_col].shift(lag)
+def create_lag_features(df, cols, lags):
+    for col in cols:
+        for lag in lags:
+            df[f'{col}_lag_{lag}'] = df[col].shift(lag)
     return df
 
-def create_rolling_features(df, target_col, windows=[24, 168]):
-    """Create rolling statistical features"""
-    df = df.copy()
-    for window in windows:
-        df[f'{target_col}_rolling_mean_{window}'] = (
-            df[target_col].rolling(window=window).mean())
-        df[f'{target_col}_rolling_std_{window}'] = (
-            df[target_col].rolling(window=window).std())
+def create_rolling_features(df, cols, windows):
+    for col in cols:
+        for window in windows:
+            df[f'{col}_rolling_mean_{window}'] = df[col].rolling(window).mean()
+            df[f'{col}_rolling_std_{window}'] = df[col].rolling(window).std()
     return df
 
-def add_holidays(df, country='FR'):
-    """Add holiday indicators for specified country"""
-    fr_holidays = holidays.France()
-    df["is_holiday"] = pd.Index(df.index.date).isin(fr_holidays).astype(int)
+def add_holidays(df, country_code):
+    hol = holidays.country_holidays(country_code)
+    df['is_holiday'] = pd.Index(df.index.date).isin(hol).astype('int8')
     return df
 
-def add_weather_features(df):
-    """Add weather features (placeholder for API integration)"""
-    # In practice, integrate with weather API/historical data
-    df['temperature'] = 15  # Placeholder
-    df['humidity'] = 70     # Placeholder
+def add_weather_features(df, temp_const=15, hum_const=70):
+    df['temperature'] = temp_const
+    df['humidity'] = hum_const
     return df
 
-def scale_features(df, exclude_cols):
-    """Scale features using StandardScaler"""
-    scaler = StandardScaler()
-    numeric_cols = [col for col in df.columns if col not in exclude_cols]
-    scaled_features = scaler.fit_transform(df[numeric_cols])
-    df_scaled = pd.DataFrame(scaled_features, columns=numeric_cols, index=df.index)
-    return pd.concat([df_scaled, df[exclude_cols]], axis=1)
+def cap_outliers(df, cols, q_low=0.001, q_high=0.999):
+    for col in cols:
+        low, high = df[col].quantile([q_low, q_high])
+        df[col] = df[col].clip(low, high)
+    return df
 
-def prepare_features(df, target_col='Global_active_power'):
-    """Full feature engineering pipeline"""
-    print("Creating time features...")
+def fill_small_gaps(df, col, max_gap_hours=48):
+    df[col] = (df[col]
+               .fillna(method='ffill', limit=max_gap_hours)
+               .fillna(method='bfill', limit=max_gap_hours))
+    return df
+
+def scale_features(df, exclude, train_idx):
+    scaler = StandardScaler().fit(df.loc[train_idx, [c for c in df.columns if c not in exclude]])
+    num_cols = [c for c in df.columns if c not in exclude]
+    df[num_cols] = scaler.transform(df[num_cols])
+    return df, scaler
+
+def prepare_features(df, target='Global_active_power', country_code='FR'):
+    df = fill_small_gaps(df, target)
     df = create_time_features(df)
-    
-    print("Creating lag features...")
-    df = create_lag_features(df, target_col)
-    
-    print("Creating rolling features...")
-    df = create_rolling_features(df, target_col)
-    
-    print("Adding holidays...")
-    df = add_holidays(df)
-    
-    print("Adding weather features...")
+    df = create_lag_features(df, [target, 'Sub_metering_3', 'Voltage'], [24, 48, 168])
+    df = create_rolling_features(df, [target, 'Voltage'], [24, 168])
+    df = add_holidays(df, country_code)
     df = add_weather_features(df)
-    
-    print("Handling missing values from feature creation...")
-    df = df.dropna()
-    
-    print("Scaling features...")
-    df = scale_features(df, exclude_cols=[target_col, 'is_holiday', 'is_weekend'])
-    
-    return df
+    df = cap_outliers(df, [target])
+    df.dropna(inplace=True)
+    train_idx, _ = train_test_split(df.index, test_size=0.2, shuffle=False)
+    df, scaler = scale_features(df, [target, 'is_holiday', 'is_weekend'], train_idx)
+    return df, scaler
 
-if __name__ == "__main__":
-    # Example usage
-    df = pd.read_csv('../data/processed/hourly_data.csv', index_col='datetime', parse_dates=True)
-    df_featured = prepare_features(df)
-    df_featured.to_csv('../data/processed/hourly_data_featured.csv')
+def run_pipeline(input_csv, output_csv, scaler_path):
+    df = pd.read_csv(input_csv, index_col='datetime', parse_dates=True)
+    featured_df, scaler = prepare_features(df)
+    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+    featured_df.to_csv(output_csv)
+    joblib.dump(scaler, scaler_path)
+
+if __name__ == '__main__':
+    run_pipeline(
+        input_csv='./data/processed/hourly_data.csv',
+        output_csv='./data/processed/hourly_featured.csv',
+        scaler_path='./data/processed/feature_scaler.joblib'
+    )

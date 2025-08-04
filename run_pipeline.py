@@ -1,55 +1,50 @@
+# run_pipeline.py
 import os
-import pandas as pd
-import pickle
-from src.data_preparation import main as prepare_data
-from src.feature_engineering import prepare_features
-from src.modeling import model_pipeline, train_test_split
-from src.evaluation import create_report
+import sys
+import subprocess
+from pathlib import Path
 
-# Create directories
-os.makedirs('data/raw', exist_ok=True)
-os.makedirs('data/processed', exist_ok=True)
-os.makedirs('results', exist_ok=True)
-
-# MODIFIED: Run data preparation without arguments
-print("=== DATA PREPARATION ===")
-prepare_data()  # Now handles download and processing internally
-
-# Run feature engineering
-print("\n=== FEATURE ENGINEERING ===")
-# MODIFIED: Use the hourly data from the new preparation code
-df = pd.read_csv('data/processed/hourly_data.csv', index_col='datetime', parse_dates=True)
-df_featured = prepare_features(df)
-df_featured.to_csv('data/processed/hourly_data_featured.csv')
-
-# MODIFIED: Add memory optimization by clearing unused objects
-del df, df_featured
-
-# Run modeling
-print("\n=== MODELING ===")
-# MODIFIED: Reload featured data to ensure clean state
-df_featured = pd.read_csv('data/processed/hourly_data_featured.csv', 
-                          index_col='datetime', parse_dates=True)
-results_df, predictions = model_pipeline(df_featured)
-
-# Save results
-results_df.to_csv('results/model_performance.csv')
-with open('results/predictions.pkl', 'wb') as f:
-    pickle.dump(predictions, f)
+def main():
+    # Define root directory
+    root_dir = Path(__file__).parent
     
-# Get y_test for evaluation
-# MODIFIED: Pass the reloaded dataframe
-train, test = train_test_split(df_featured)
-test['Global_active_power'].to_csv('results/y_test.csv')
+    # Create necessary directories
+    (root_dir / "data/raw").mkdir(parents=True, exist_ok=True)
+    (root_dir / "data/processed").mkdir(parents=True, exist_ok=True)
+    (root_dir / "results").mkdir(parents=True, exist_ok=True)
 
-# Create final report
-print("\n=== EVALUATION & REPORTING ===")
-create_report(
-    results_df,
-    predictions,
-    test['Global_active_power'],
-    'results/Energy_Forecasting_Report.pdf'
-)
+    # Execute each stage in sequence
+    stages = [
+        ("data_preparation", "python src/data_preparation.py"),
+        ("feature_engineering", "python src/feature_engineering.py"),
+        ("modeling", "python src/modeling.py"),
+        ("evaluation", "python src/evaluation.py")
+    ]
+    
+    for name, command in stages:
+        print(f"\n{'='*50}")
+        print(f"RUNNING STAGE: {name.upper()}")
+        print(f"{'='*50}")
+        try:
+            subprocess.run(command, shell=True, check=True)
+            print(f"✅ {name} completed successfully")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Error in {name}: {e}")
+            sys.exit(1)
+    
+    print("\n" + "="*50)
+    print("PIPELINE EXECUTION COMPLETED SUCCESSFULLY!")
+    print("="*50)
+    
+    # Print final conclusion
+    conclusion_path = root_dir / "results/evaluation_conclusion.txt"
+    if conclusion_path.exists():
+        print("\nFINAL CONCLUSION:")
+        print("-"*50)
+        with open(conclusion_path, "r") as f:
+            print(f.read())
+    else:
+        print("\n⚠️ Could not find evaluation conclusion")
 
-print("\n=== PIPELINE COMPLETE ===")
-print("Results saved in 'results' directory")
+if __name__ == "__main__":
+    main()
