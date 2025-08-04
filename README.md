@@ -1,7 +1,15 @@
 # Energy Forecasting Project
 
 ## Overview
-The Energy Forecasting Project is designed to analyze and predict energy consumption  using  data science techniques. This project leverages exploratory data analysis (EDA), feature engineering, machine learning modeling to provide energy forecasts.
+The Energy Forecasting Project is a complete data science solution created to study and predict household energy usage patterns for ProgressSoft.  This project uses a full machine learning process that includes EDA, advanced feature engineering, with 3 forecasts models to give accurate energy consumption predictions .
+
+The project analyzes household power consumption data using three different modeling approaches:
+- **SARIMA**
+- **Facebook Prophet**
+- **XGBoost**
+
+## Dataset
+This project uses the Individual home Electric Power Consumption dataset, which contains measurements of electric power consumption in one home with a one-minute sampling rate over a time of almost 4 years.  The file includes different electrical numbers and sub-metering values.
 
 | Feature                     | Description                                                                      | Units         |
 | --------------------------- | -------------------------------------------------------------------------------- | ------------- |
@@ -18,47 +26,92 @@ The Energy Forecasting Project is designed to analyze and predict energy consump
 ## Project Structure
 
 ```
-├── data/                # Raw and processed data files will be generated using data preperation 
-├── notebooks/           # IPYNB notebooks for analysis and reporting
-├── results/             # Outputs and results of the analysis
-├── src/                 # Source code for data preparation, feature engineering, modeling, evaluation
-│   ├── data_preparation.py
-│   ├── feature_engineering.py
-│   ├── modeling.py
-│   ├── evaluation.py
-├── run_pipeline.py      # Script to execute the full pipeline
-├── requirements.txt     # Python dependencies
+energy_forecasting_project/
+├── data/                          # Data storage directory
+├── notebooks/                     # Jupyter notebooks for analysis
+│   ├── EDA.ipynb                  # Exploratory Data Analysis
+│   ├── Comprehensive_Energy_Forecasting_Report.ipynb  # Complete analysis report
+│   └── data/                      # Notebook-specific data files
+├── src/                           # Source code modules
+│   ├── data_preparation.py        # Data loading and preprocessing
+│   ├── feature_engineering.py     # Feature creation and scaling
+│   ├── modeling.py                # Model training and prediction
+│   └── evaluation.py              # Model evaluation and reporting
+├── results/                       # Output directory for analysis results
+├── run_pipeline.py                # Main pipeline execution script
+├── requirements.txt               # Python package dependencies
+├── README.md                      # Project documentation
+├── Final model comparsion report.pdf  # Model comparison analysis
+└── Introduction with EDA.pdf      # EDA summary report
 ```
 
 ## Installation
 
-1. Clone the repository:
-   ```
+### Prerequisites
+- Python 3.8 or higher
+- Git (for cloning the repository)
+
+### Setup Instructions
+
+1. **Clone the repository:**
+   ```bash
    git clone https://github.com/Ali-rashaideh/energy_forecasting_project.git
    ```
 
-2. Navigate to the project directory:
-   ```
+2. **Navigate to the project directory:**
+   ```bash
    cd energy_forecasting_project
    ```
 
-3. Set up the Python virtual environment:
+3. **Create and activate the Python virtual environment:**
+   
+   **On Windows (PowerShell):**
+   ```powershell
+   python -m venv env
+   .\eng\Scripts\Activate.ps1
    ```
-   .venv\Scripts\activate.ps1
+   
+   **On macOS/Linux:**
+   ```bash
+   python -m venv eng
+   source eng/bin/activate
    ```
 
-4. Install the required dependencies:
-   ```
+4. **Install the required dependencies:**
+   ```bash
    pip install -r requirements.txt
    ```
 
+
 ## Usage
 
-### Notebooks
-- `EDA.ipynb`: Perform EDA on the energy dataset.
-- `Energy_Forecasting_Report.ipynb`: a detailed report on the project.
+### Quick Start
+To run the complete analysis pipeline:
+```bash
+python run_pipeline.py
+```
 
-### Scripts
+This will execute all stages of the pipeline and generate a comprehensive analysis report.
+
+### Individual Components
+
+#### Jupyter Notebooks
+The project includes interactive notebooks for detailed analysis:
+
+- **`EDA.ipynb`**: Comprehensive exploratory data analysis including:
+   - Data quality review and missing value analysis
+   - Statistical reports and spread analysis
+   - Time series display and pattern spotting
+   - Correlation analysis and feature links
+
+- **`Comprehensive_Energy_Forecasting_Report.ipynb`**: Complete project analysis featuring:
+  - End-to-end pipeline demonstration  Model comparison and performance review
+  - Uncertainty measurement analysis
+  - Business thoughts and suggestions
+
+#### Python Scripts
+
+**Core Pipeline Components:**
 
 - `data_preparation.py`: This script handles the preprocessing of raw data. It performs the following tasks:
   - Downloads and extracts the dataset from a specified URL.
@@ -91,28 +144,103 @@ The Energy Forecasting Project is designed to analyze and predict energy consump
   - Generates a final report in PDF format summarizing the entire analysis.
 
 ### Running Scripts
-To run the full pipeline, use the following command:
-```
+
+**Execute the complete pipeline:**
+```bash
 python run_pipeline.py
 ```
 
-## Results
-The results of the analysis and forecasting are stored in the `results/` directory. This includes model outputs, visualizations, evaluation metrics, and a comprehensive PDF report.
+
+
+## Key Features
+
+### Data Processing
+- **Automated data download** and extraction from source URLs
+- **Comprehensive data cleaning** including missing value imputation and outlier detection
+- **Multi-frequency aggregation** (minute, hourly, daily, weekly)
+- **Data quality reporting** with detailed statistics
+
+### Feature Engineering
+- **Time-based features**: Hour, day of week, month, season
+- **Lag features**: Historical values for trend capture
+- **Rolling statistics**: Moving averages and standard deviations
+- **Holiday indicators**: Integration with holidays library
+- **Feature scaling**: StandardScaler normalization for ML models
+
+### Modeling Approaches
+- **SARIMA**: Seasonal Auto-Regressive Integrated Moving Average for time series
+- **Facebook Prophet**: Robust forecasting with automatic seasonality detection
+- **XGBoost**: Gradient boosting for complex pattern recognition
+
+### Evaluation Metrics
+- **Point accuracy**: MAE, RMSE, MAPE
+- **Uncertainty quantification**: Prediction intervals and coverage analysis
+- **Residual analysis**: Autocorrelation and normality tests
+- **Visual diagnostics**: Comprehensive plotting and reporting
+
+## Results and Outputs
+
+The analysis generates comprehensive results stored in the `results/` directory:
+
+### Generated Files
+- **Model predictions**: CSV files with forecasts and uncertainty intervals
+- **Performance metrics**: JSON files with detailed evaluation statistics
+- **Visualization outputs**: PNG/PDF plots for model comparison and diagnostics
+- **Comprehensive PDF report**: Executive summary with key findings and recommendations
+
+### Key Findings
+- Comparative analysis of three forecasting approaches
+- Uncertainty quantification for risk assessment
+- Seasonal and temporal pattern identification
+- Model performance benchmarking and recommendations
 
 ## Dependencies
-The project requires the following Python packages:
-- numpy
-- pandas
-- matplotlib
-- seaborn
-- scikit-learn
-- scipy
-- holidays
-- cmdstanpy
-- statsmodels
-- prophet
-- xgboost
+
+### Core Libraries
+The project uses the following essential Python packages:
+
+**Data Processing & Analysis:**
+- `pandas==2.3.1` - Data manipulation and analysis
+- `numpy==2.3.2` - Numerical computing
+- `scipy==1.16.1` - Scientific computing
+
+**Machine Learning:**
+- `scikit-learn==1.7.1` - Machine learning algorithms and utilities
+- `xgboost` - Gradient boosting framework
+- `prophet==1.1.7` - Facebook's forecasting tool
+- `statsmodels` - Statistical modeling
+
+**Visualization:**
+- `matplotlib==3.10.5` - Plotting library
+- `seaborn==0.13.2` - Statistical data visualization
+- `missingno==0.5.2` - Missing data visualization
+
+**Time Series & Utilities:**
+- `holidays==0.77` - Holiday calendar integration
+- `joblib==1.5.1` - Serialization and parallel computing
+- `cmdstanpy==1.2.5` - Stan interface for Prophet
+
+**Development Environment:**
+- `jupyter` - Interactive notebook environment
+- `ipykernel` - Jupyter kernel for Python
+
+### Installation Notes
+- Some packages may require additional system dependencies
+- Prophet requires PyStan, which may need compilation on some systems
+- XGBoost may benefit from GPU acceleration if CUDA is available
 
 
-## Contact
-For questions or feedback, alirashaideh@yahoo.com.
+```bibtex
+@software{energy_forecasting_project,
+  author = {Ali Rashaideh},
+  title = {Energy Forecasting Project: A Comprehensive Machine Learning Pipeline for Household Energy Consumption Prediction},
+  url = {https://github.com/Ali-rashaideh/energy_forecasting_project},
+  year = {2025}
+}
+```
+
+
+**Ali Rashaideh**
+- Email: alirashaideh@yahoo.com
+- GitHub: [@Ali-rashaideh](https://github.com/Ali-rashaideh)
+
