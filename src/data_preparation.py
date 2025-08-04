@@ -8,6 +8,7 @@ import numpy as np
 import holidays
 from sklearn.preprocessing import StandardScaler
 
+#extract data from a zip file and handle the CSV file
 def download_and_extract_data(url, extract_dir):
     os.makedirs(extract_dir, exist_ok=True)
     zip_file = os.path.join(extract_dir, "household_power_consumption.zip")
@@ -24,6 +25,7 @@ def download_and_extract_data(url, extract_dir):
         shutil.move(src, dst)
     return dst
 
+# Load, clean, and prepare the data
 def load_data(file_path):
     df = pd.read_csv(
         file_path,
@@ -44,6 +46,7 @@ def load_data(file_path):
     df.set_index("datetime", inplace=True)
     return df
 
+# Handle missing values
 def handle_missing_values(df, method="ffill"):
     if method == "ffill":
         return df.ffill()
@@ -53,6 +56,7 @@ def handle_missing_values(df, method="ffill"):
         return df.interpolate(limit_direction="both")
     return df
 
+# Detect and handle outliers
 def detect_outliers(df, threshold=3.0):
     df = df.copy()
     numeric_cols = df.select_dtypes(include=np.number).columns
@@ -67,6 +71,7 @@ def detect_outliers(df, threshold=3.0):
         df[col] = df[col].clip(lb, ub)
     return df
 
+# Aggregate data into different timeframes
 def aggregate(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
     agg = {
         'Global_active_power':   'sum',

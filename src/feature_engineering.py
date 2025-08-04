@@ -32,13 +32,16 @@ def create_rolling_features(df, cols, windows):
     return df
 
 def add_holidays(df, country_code):
-    hol = holidays.country_holidays(country_code)
-    df['is_holiday'] = pd.Index(df.index.date).isin(hol).astype('int8')
-    return df
-
-def add_weather_features(df, temp_const=15, hum_const=70):
-    df['temperature'] = temp_const
-    df['humidity'] = hum_const
+    df.index = pd.to_datetime(df.index)
+    years = df.index.year.unique().tolist()
+    hol = holidays.country_holidays(country_code, years=years)
+    holiday_dates = set(hol.keys())
+    weekend_days = [4, 5] if country_code == 'JO' else [5, 6]
+    df['is_holiday_or_weekend'] = (
+        np.isin(df.index.date, list(holiday_dates)) | 
+        df.index.dayofweek.isin(weekend_days)
+    ).astype('int8')
+    
     return df
 
 def cap_outliers(df, cols, q_low=0.001, q_high=0.999):
@@ -59,17 +62,16 @@ def scale_features(df, exclude, train_idx):
     df[num_cols] = scaler.transform(df[num_cols])
     return df, scaler
 
-def prepare_features(df, target='Global_active_power', country_code='FR'):
+def prepare_features(df, target='Global_active_power', country_code='JO'):
     df = fill_small_gaps(df, target)
     df = create_time_features(df)
     df = create_lag_features(df, [target, 'Sub_metering_3', 'Voltage'], [24, 48, 168])
     df = create_rolling_features(df, [target, 'Voltage'], [24, 168])
     df = add_holidays(df, country_code)
-    df = add_weather_features(df)
     df = cap_outliers(df, [target])
     df.dropna(inplace=True)
     train_idx, _ = train_test_split(df.index, test_size=0.2, shuffle=False)
-    df, scaler = scale_features(df, [target, 'is_holiday', 'is_weekend'], train_idx)
+    df, scaler = scale_features(df, [target, 'is_holiday_or_weekend'], train_idx)
     return df, scaler
 
 def run_pipeline(input_csv, output_csv, scaler_path):
