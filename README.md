@@ -220,24 +220,6 @@ The project uses the following essential Python packages:
 - `joblib==1.5.1` - Serialization and parallel computing
 - `cmdstanpy==1.2.5` - Stan interface for Prophet
 
-**Development Environment:**
-- `jupyter` - Interactive notebook environment
-- `ipykernel` - Jupyter kernel for Python
-
-### Installation Notes
-- Some packages may require additional system dependencies
-- Prophet requires PyStan, which may need compilation on some systems
-- XGBoost may benefit from GPU acceleration if CUDA is available
-
-
-```bibtex
-@software{energy_forecasting_project,
-  author = {Ali Rashaideh},
-  title = {Energy Forecasting Project: A Comprehensive Machine Learning Pipeline for Household Energy Consumption Prediction},
-  url = {https://github.com/Ali-rashaideh/energy_forecasting_project},
-  year = {2025}
-}
-```
 
 
 **Ali Rashaideh**
